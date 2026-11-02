@@ -417,12 +417,10 @@ class CosyComposer
                 $this->getPrClient()->closePullRequestWithComment($this->slug, $pr_number, $comment);
                 $this->getLogger()->log('info', new Message("Successfully closed PR $pr_number"));
                 if ($is_owned === true && $branch_name !== '' && $branch_name !== $default_branch && $branch_name !== $active_branch_name) {
-                    try {
-                        $this->getPrClient()->deleteBranch($branch_slug, $branch_name);
+                    if ($this->getPrClient()->deleteBranch($branch_slug, $branch_name)) {
                         $this->getLogger()->log('info', new Message("Successfully deleted branch $branch_name after closing PR $pr_number"));
-                    } catch (\Throwable $e) {
-                        $msg = $e->getMessage();
-                        $this->getLogger()->log('error', new Message("Caught an exception trying to delete branch $branch_name after closing PR $pr_number. The message was '$msg'"));
+                    } else {
+                        $this->getLogger()->log('error', new Message("Could not delete branch $branch_name after closing PR $pr_number"));
                     }
                 }
             } catch (\Throwable $e) {
@@ -474,12 +472,10 @@ class CosyComposer
                     $this->getPrClient()->closePullRequestWithComment($this->slug, $pr_number, $comment);
                     $this->getLogger()->log('info', new Message("Successfully closed PR $pr_number"));
                     if ($is_owned === true && $branch_name !== '' && $branch_name !== $default_branch) {
-                        try {
-                            $this->getPrClient()->deleteBranch($branch_slug, $branch_name);
+                        if ($this->getPrClient()->deleteBranch($branch_slug, $branch_name)) {
                             $this->getLogger()->log('info', new Message("Successfully deleted branch $branch_name after closing PR $pr_number"));
-                        } catch (\Throwable $e) {
-                            $msg = $e->getMessage();
-                            $this->getLogger()->log('error', new Message("Caught an exception trying to delete branch $branch_name after closing PR $pr_number. The message was '$msg'"));
+                        } else {
+                            $this->getLogger()->log('error', new Message("Could not delete branch $branch_name after closing PR $pr_number"));
                         }
                     }
                 } catch (\Throwable $e) {

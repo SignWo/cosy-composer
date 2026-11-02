@@ -163,16 +163,17 @@ class Gitlab implements ProviderInterface
         ]);
     }
 
-    public function deleteBranch(Slug $slug, string $branch_name) : void
+    public function deleteBranch(Slug $slug, string $branch_name) : bool
     {
         try {
             $this->client->repositories()->deleteBranch(self::getProjectId($slug->getUrl()), $branch_name);
         } catch (\Throwable $e) {
             if ((int) $e->getCode() !== 404) {
-                throw $e;
+                return false;
             }
         }
         unset($this->cache['branches']);
+        return true;
     }
 
     public function createPullRequest(Slug $slug, $params)

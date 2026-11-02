@@ -37,7 +37,21 @@ class DeleteBranchProviderTest extends TestCase
             ->with('git')
             ->willReturn($git);
 
-        (new Github($client))->deleteBranch($slug, 'violinist-test');
+        self::assertTrue((new Github($client))->deleteBranch($slug, 'violinist-test'));
+    }
+
+    public function testGithubDeleteBranchErrors() : void
+    {
+        $slug = Slug::createFromUrl('https://github.com/testUser/testRepo');
+        $client = $this->createMock(GithubClient::class);
+        $client->method('api')
+            ->willThrowException(new \RuntimeException('Forbidden', 403));
+        self::assertFalse((new Github($client))->deleteBranch($slug, 'violinist-test'));
+
+        $client = $this->createMock(GithubClient::class);
+        $client->method('api')
+            ->willThrowException(new \RuntimeException('Not found', 404));
+        self::assertTrue((new Github($client))->deleteBranch($slug, 'violinist-test'));
     }
 
     public function testGitlabDeleteBranch() : void
@@ -52,7 +66,21 @@ class DeleteBranchProviderTest extends TestCase
             ->method('repositories')
             ->willReturn($repositories);
 
-        (new Gitlab($client))->deleteBranch($slug, 'violinist-test');
+        self::assertTrue((new Gitlab($client))->deleteBranch($slug, 'violinist-test'));
+    }
+
+    public function testGitlabDeleteBranchErrors() : void
+    {
+        $slug = Slug::createFromUrl('https://gitlab.com/testUser/testRepo');
+        $client = $this->createMock(GitlabClient::class);
+        $client->method('repositories')
+            ->willThrowException(new \RuntimeException('Forbidden', 403));
+        self::assertFalse((new Gitlab($client))->deleteBranch($slug, 'violinist-test'));
+
+        $client = $this->createMock(GitlabClient::class);
+        $client->method('repositories')
+            ->willThrowException(new \RuntimeException('Not found', 404));
+        self::assertTrue((new Gitlab($client))->deleteBranch($slug, 'violinist-test'));
     }
 
     public function testBitbucketDeleteBranch() : void
@@ -82,6 +110,20 @@ class DeleteBranchProviderTest extends TestCase
             ->method('repositories')
             ->willReturn($repositories);
 
-        (new Bitbucket($client))->deleteBranch($slug, 'violinist-test');
+        self::assertTrue((new Bitbucket($client))->deleteBranch($slug, 'violinist-test'));
+    }
+
+    public function testBitbucketDeleteBranchErrors() : void
+    {
+        $slug = Slug::createFromUrl('https://bitbucket.org/testUser/testRepo');
+        $client = $this->createMock(BitbucketClient::class);
+        $client->method('repositories')
+            ->willThrowException(new \RuntimeException('Forbidden', 403));
+        self::assertFalse((new Bitbucket($client))->deleteBranch($slug, 'violinist-test'));
+
+        $client = $this->createMock(BitbucketClient::class);
+        $client->method('repositories')
+            ->willThrowException(new \RuntimeException('Not found', 404));
+        self::assertTrue((new Bitbucket($client))->deleteBranch($slug, 'violinist-test'));
     }
 }

@@ -13,6 +13,8 @@ class CloseNoLongerRelevantBranchCleanupTest extends ClosePrsNotTrulyOutdatedPac
     /** @var string[] */
     private array $deletedBranches = [];
 
+    protected bool $deleteBranchResult = true;
+
     public function setUp() : void
     {
         parent::setUp();
@@ -21,6 +23,7 @@ class CloseNoLongerRelevantBranchCleanupTest extends ClosePrsNotTrulyOutdatedPac
         $this->getMockProvider()->method('deleteBranch')
             ->willReturnCallback(function (Slug $slug, string $branch_name) {
                 $this->deletedBranches[] = $branch_name;
+                return $this->deleteBranchResult;
             });
     }
 
@@ -28,6 +31,12 @@ class CloseNoLongerRelevantBranchCleanupTest extends ClosePrsNotTrulyOutdatedPac
     {
         parent::testOutdatedClosed();
         self::assertEquals(['psrcache100101'], $this->deletedBranches);
+        $this->assertBranchCleanupLogged();
+    }
+
+    protected function assertBranchCleanupLogged() : void
+    {
+        $this->assertOutputContainsMessage('Successfully deleted branch psrcache100101 after closing PR 789', $this->cosy);
     }
 
     protected function getPrsNamed() : NamedPrs

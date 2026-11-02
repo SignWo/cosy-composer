@@ -240,7 +240,7 @@ class Github implements ProviderInterface
         ]);
     }
 
-    public function deleteBranch(Slug $slug, string $branch_name) : void
+    public function deleteBranch(Slug $slug, string $branch_name) : bool
     {
         try {
             /** @var \Github\Api\GitData $git */
@@ -248,9 +248,10 @@ class Github implements ProviderInterface
             $git->references()->remove($slug->getUserName(), $slug->getUserRepo(), sprintf('heads/%s', $branch_name));
         } catch (\Throwable $e) {
             if ((int) $e->getCode() !== 404) {
-                throw $e;
+                return false;
             }
         }
         unset($this->cache['branches']);
+        return true;
     }
 }
